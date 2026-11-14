@@ -95,7 +95,7 @@ def main():
     ax.set_xlim(-0.2, max_round + 0.2)
     ax.set_xticks(range(0, max_round + 1))
     ax.set_ylim(0, 100)
-    ax.set_xlabel("learning round (150 stream questions each; held-out set frozen and never learned from)")
+    ax.set_xlabel("learning round (150 stream questions each; held-out set is never learned from)", fontsize=9)
     ax.set_ylabel("held-out Hits@1 (%)")
     ax.set_title("Held-out accuracy rises as the graph repairs itself", loc="left", fontsize=13, color=INK)
     ax.grid(axis="y", color=GRID, lw=0.8)
