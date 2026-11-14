@@ -1,0 +1,20 @@
+{
+ "readers": 32,
+ "seconds": 66.9,
+ "reads": 8037,
+ "qps": 120.1,
+ "p50_ms": 35.3,
+ "p95_ms": 620.5,
+ "p99_ms": 1435.6,
+ "mean_ms": 232.3,
+ "write_batches": 170,
+ "edges_written": 8500,
+ "errors": 0,
+ "compression": {
+  "shortcuts": 21,
+  "hops_mean": 2.48,
+  "full_traversal_p50_ms": 4.83,
+  "shortcut_p50_ms": 4.91,
+  "speedup": 0.98
+ }
+}
