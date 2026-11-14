@@ -11,9 +11,11 @@ HydraDB Hackathon, Track 1: the self-improving graph.
 | Vector-store RAG: all 18k passages, top-5, Claude answers | 15.0% | 15.3% | 14.7% | 1867 |
 | Claude alone, no retrieval | 36.3% | 40.7% | 32.0% | 689 |
 | Damaged graph, no learning | 42.0% | 35.3% | 48.7% | 1467 |
+| Random ingestion, same reading budget (control) | 52.7% | 49.3% | 56.0% | 685 |
 | Healing only | 64.3% | 77.3% | 51.3% | 1467 |
 | Plan learning only | 45.0% | 40.0% | 50.0% | 727 |
 | All mechanisms except entity merge | 65.3% | 78.0% | 52.7% | 344 |
+| DesirePath with 20% wrong feedback | 64.3% | 77.3% | 51.3% | 461 |
 | **DesirePath** (all four mechanisms) | 65.0% | 77.3% | 52.7% | 344 |
 | Upper bound: complete graph | 99.3% | 99.3% | 99.3% | 1467 |
 | **DesirePath, serving with query-time repair** | 80.0% | 78.7% | 81.3% | 4283 |

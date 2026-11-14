@@ -1,0 +1,387 @@
+{
+ "variant": "noisy_fb",
+ "config": {
+  "heal": "demand",
+  "plans": "learn",
+  "planner": "llm",
+  "extractor": "llm",
+  "max_tries": 3,
+  "compress": true,
+  "resolve": true,
+  "feedback_noise": 0.2,
+  "random_docs_per_q": 2.0,
+  "seed": 0
+ },
+ "rounds": [
+  {
+   "round": 0,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.42,
+    "f1": 0.26685261390320314,
+    "ms_p50": 3.7963000359013677,
+    "queries": 1.0433333333333332,
+    "tokens": 1466.8833333333334,
+    "from_memory": 0.0,
+    "via_shortcut": 0.0,
+    "ms_mean": 5.401155001794298,
+    "hits1_seen-topic": 0.35333333333333333,
+    "hits1_unseen-topic": 0.4866666666666667,
+    "hits1_2hop": 0.4508670520231214,
+    "hits1_3hop": 0.3779527559055118,
+    "hits1_ci": [
+     0.37,
+     0.4766666666666667
+    ]
+   },
+   "eval_s": 1.7,
+   "graph": {
+    "text_edges": 0,
+    "docs_read": 0,
+    "templates": 0,
+    "plans": 0
+   },
+   "edits": {}
+  },
+  {
+   "round": 1,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.4766666666666667,
+    "f1": 0.3372176595757295,
+    "ms_p50": 5.6359999580308795,
+    "queries": 1.04,
+    "tokens": 1353.8766666666668,
+    "from_memory": 0.07666666666666666,
+    "via_shortcut": 0.0,
+    "ms_mean": 6.804324995415906,
+    "hits1_seen-topic": 0.47333333333333333,
+    "hits1_unseen-topic": 0.48,
+    "hits1_2hop": 0.4797687861271676,
+    "hits1_3hop": 0.47244094488188976,
+    "hits1_ci": [
+     0.42333333333333334,
+     0.5333333333333333
+    ]
+   },
+   "eval_s": 2.1,
+   "graph": {
+    "text_edges": 7616,
+    "docs_read": 702,
+    "templates": 101,
+    "plans": 41
+   },
+   "edits": {
+    "ingest": 114,
+    "reweight": 140,
+    "new_entity": 336,
+    "merge": 13
+   },
+   "stream": {
+    "n": 150,
+    "hits1": 0.5466666666666666,
+    "f1": 0.44123968424842425,
+    "ms_p50": 11.608700035139918,
+    "queries": 3.7266666666666666,
+    "tokens": 1407.6266666666668,
+    "from_memory": 0.04666666666666667,
+    "via_shortcut": 0.0,
+    "ms_mean": 19.91893933697914,
+    "hits1_2hop": 0.5196078431372549,
+    "hits1_3hop": 0.6041666666666666,
+    "hits1_ci": [
+     0.4666666666666667,
+     0.6333333333333333
+    ]
+   }
+  },
+  {
+   "round": 2,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.5366666666666666,
+    "f1": 0.4235729160534738,
+    "ms_p50": 7.064800010994077,
+    "queries": 1.04,
+    "tokens": 1187.33,
+    "from_memory": 0.19,
+    "via_shortcut": 0.0,
+    "ms_mean": 8.87208599674826,
+    "hits1_seen-topic": 0.5866666666666667,
+    "hits1_unseen-topic": 0.4866666666666667,
+    "hits1_2hop": 0.5260115606936416,
+    "hits1_3hop": 0.5511811023622047,
+    "hits1_ci": [
+     0.4866666666666667,
+     0.5933333333333334
+    ]
+   },
+   "eval_s": 2.7,
+   "graph": {
+    "text_edges": 15250,
+    "docs_read": 1431,
+    "templates": 174,
+    "plans": 50
+   },
+   "edits": {
+    "ingest": 209,
+    "reweight": 281,
+    "new_entity": 647,
+    "merge": 16,
+    "compress": 2
+   },
+   "stream": {
+    "n": 150,
+    "hits1": 0.6933333333333334,
+    "f1": 0.5485952357763831,
+    "ms_p50": 16.03549998253584,
+    "queries": 3.86,
+    "tokens": 1278.78,
+    "from_memory": 0.14,
+    "via_shortcut": 0.0,
+    "ms_mean": 24.140253992130358,
+    "hits1_2hop": 0.7222222222222222,
+    "hits1_3hop": 0.65,
+    "hits1_ci": [
+     0.62,
+     0.7733333333333333
+    ]
+   }
+  },
+  {
+   "round": 3,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.5866666666666667,
+    "f1": 0.4823805721255428,
+    "ms_p50": 9.022600017488003,
+    "queries": 1.0233333333333334,
+    "tokens": 989.9166666666666,
+    "from_memory": 0.33,
+    "via_shortcut": 0.0,
+    "ms_mean": 11.161606332364803,
+    "hits1_seen-topic": 0.68,
+    "hits1_unseen-topic": 0.49333333333333335,
+    "hits1_2hop": 0.5838150289017341,
+    "hits1_3hop": 0.5905511811023622,
+    "hits1_ci": [
+     0.5366666666666666,
+     0.64
+    ]
+   },
+   "eval_s": 3.5,
+   "graph": {
+    "text_edges": 18784,
+    "docs_read": 1804,
+    "templates": 218,
+    "plans": 56
+   },
+   "edits": {
+    "ingest": 289,
+    "reweight": 420,
+    "new_entity": 778,
+    "merge": 19,
+    "compress": 4
+   },
+   "stream": {
+    "n": 150,
+    "hits1": 0.6133333333333333,
+    "f1": 0.5645676832362568,
+    "ms_p50": 14.64559999294579,
+    "queries": 3.6933333333333334,
+    "tokens": 1049.92,
+    "from_memory": 0.28,
+    "via_shortcut": 0.0,
+    "ms_mean": 19.208646004553884,
+    "hits1_2hop": 0.6635514018691588,
+    "hits1_3hop": 0.4883720930232558,
+    "hits1_ci": [
+     0.54,
+     0.6933333333333334
+    ]
+   }
+  },
+  {
+   "round": 4,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.6066666666666667,
+    "f1": 0.5108006726691187,
+    "ms_p50": 10.716099990531802,
+    "queries": 1.03,
+    "tokens": 781.88,
+    "from_memory": 0.47333333333333333,
+    "via_shortcut": 0.0,
+    "ms_mean": 13.892275333637372,
+    "hits1_seen-topic": 0.72,
+    "hits1_unseen-topic": 0.49333333333333335,
+    "hits1_2hop": 0.5953757225433526,
+    "hits1_3hop": 0.6220472440944882,
+    "hits1_ci": [
+     0.5533333333333333,
+     0.6633333333333333
+    ]
+   },
+   "eval_s": 4.3,
+   "graph": {
+    "text_edges": 24704,
+    "docs_read": 2380,
+    "templates": 258,
+    "plans": 59
+   },
+   "edits": {
+    "ingest": 357,
+    "reweight": 562,
+    "new_entity": 1041,
+    "merge": 28,
+    "compress": 7,
+    "decompress": 1
+   },
+   "stream": {
+    "n": 150,
+    "hits1": 0.72,
+    "f1": 0.613536966570103,
+    "ms_p50": 17.151299980469048,
+    "queries": 3.7733333333333334,
+    "tokens": 894.08,
+    "from_memory": 0.3933333333333333,
+    "via_shortcut": 0.0,
+    "ms_mean": 26.56205533227573,
+    "hits1_2hop": 0.75,
+    "hits1_3hop": 0.6724137931034483,
+    "hits1_ci": [
+     0.6466666666666666,
+     0.7866666666666666
+    ]
+   }
+  },
+  {
+   "round": 5,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.6333333333333333,
+    "f1": 0.5456817289734259,
+    "ms_p50": 11.8141999701038,
+    "queries": 1.0533333333333332,
+    "tokens": 583.37,
+    "from_memory": 0.6033333333333334,
+    "via_shortcut": 0.0,
+    "ms_mean": 23.785378667525947,
+    "hits1_seen-topic": 0.76,
+    "hits1_unseen-topic": 0.5066666666666667,
+    "hits1_2hop": 0.6242774566473989,
+    "hits1_3hop": 0.6456692913385826,
+    "hits1_ci": [
+     0.58,
+     0.69
+    ]
+   },
+   "eval_s": 7.2,
+   "graph": {
+    "text_edges": 30086,
+    "docs_read": 2922,
+    "templates": 281,
+    "plans": 60
+   },
+   "edits": {
+    "ingest": 433,
+    "reweight": 700,
+    "new_entity": 1255,
+    "merge": 32,
+    "compress": 9,
+    "decompress": 1
+   },
+   "stream": {
+    "n": 150,
+    "hits1": 0.7133333333333334,
+    "f1": 0.6321880959732549,
+    "ms_p50": 19.151399959810078,
+    "queries": 3.966666666666667,
+    "tokens": 710.28,
+    "from_memory": 0.52,
+    "via_shortcut": 0.0,
+    "ms_mean": 30.895898662662756,
+    "hits1_2hop": 0.7261904761904762,
+    "hits1_3hop": 0.696969696969697,
+    "hits1_ci": [
+     0.64,
+     0.7866666666666666
+    ]
+   }
+  },
+  {
+   "round": 6,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.6433333333333333,
+    "f1": 0.5604292212907052,
+    "ms_p50": 13.005599961616099,
+    "queries": 1.0466666666666666,
+    "tokens": 460.91,
+    "from_memory": 0.6866666666666666,
+    "via_shortcut": 0.0,
+    "ms_mean": 28.698568662318092,
+    "hits1_seen-topic": 0.7733333333333333,
+    "hits1_unseen-topic": 0.5133333333333333,
+    "hits1_2hop": 0.6242774566473989,
+    "hits1_3hop": 0.6692913385826772,
+    "hits1_ci": [
+     0.5933333333333334,
+     0.6966666666666667
+    ]
+   },
+   "eval_s": 8.7,
+   "graph": {
+    "text_edges": 33360,
+    "docs_read": 3286,
+    "templates": 295,
+    "plans": 60
+   },
+   "edits": {
+    "ingest": 492,
+    "reweight": 835,
+    "new_entity": 1392,
+    "merge": 37,
+    "compress": 12,
+    "decompress": 1
+   },
+   "stream": {
+    "n": 150,
+    "hits1": 0.6933333333333334,
+    "f1": 0.6526963200611753,
+    "ms_p50": 20.61040000990033,
+    "queries": 3.8466666666666667,
+    "tokens": 527.5466666666666,
+    "from_memory": 0.6466666666666666,
+    "via_shortcut": 0.0,
+    "ms_mean": 29.006748665124178,
+    "hits1_2hop": 0.6210526315789474,
+    "hits1_3hop": 0.8181818181818182,
+    "hits1_ci": [
+     0.62,
+     0.7666666666666667
+    ]
+   }
+  }
+ ],
+ "started": 1794650426.610763,
+ "finished": 1794651005.2571816,
+ "healer": {
+  "docs_read": 3286,
+  "edges_added": 33360,
+  "unlinked": 887,
+  "triples_found": 27906
+ },
+ "resolver": {
+  "exact": 25264,
+  "normalised": 326,
+  "alias_merge": 37,
+  "new_entity": 1392,
+  "dropped": 887
+ },
+ "compressor": {
+  "compressed": 12,
+  "invalidated": 1,
+  "edges": 44
+ }
+}
