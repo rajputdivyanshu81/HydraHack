@@ -4,7 +4,8 @@
 #   -Group B   baselines and ablations                          (dev HydraDB, port 18443)
 #   -Group All everything sequentially on the main HydraDB (default)
 # A and B can run at the same time in two terminals; run `python -m eval.plot` when both finish.
-param([switch]$Offline, [int]$Rounds = 6, [ValidateSet("A", "B", "All")][string]$Group = "All")
+param([switch]$Offline, [int]$Rounds = 6, [ValidateSet("A", "B", "All")][string]$Group = "All",
+      [string[]]$Only = @())   # run just these variants (Group B / All), e.g. -Only heal_only,no_merge
 
 $ErrorActionPreference = "Continue"   # native tools (docker, HF) write progress to stderr
 Set-Location (Split-Path $PSScriptRoot -Parent)
@@ -14,6 +15,9 @@ $off = @(); if ($Offline) { $off = @("--offline") }
 $suffix = ""; if ($Offline) { $suffix = "_offline" }
 
 function Run-Variants($names) {
+    # -File passes "a,b" as one string, so split it here
+    $want = @($Only | ForEach-Object { $_ -split "," } | Where-Object { $_ })
+    if ($want.Count -gt 0) { $names = $names | Where-Object { $want -contains $_ } }
     foreach ($v in $names) {
         Write-Host "=== $v ==="
         & $py -u -m eval.run_curve --variant $v --rounds $Rounds @off

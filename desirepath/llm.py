@@ -9,6 +9,7 @@ import json
 import os
 import sqlite3
 import threading
+import time
 from typing import Any
 
 import anthropic
@@ -87,13 +88,27 @@ def call_json(system: str, prompt: str, schema: dict, *, max_tokens: int = 2000,
         USAGE.add(row[1], row[2], cached=True)
         return json.loads(row[0])
 
-    resp = client().messages.create(
-        model=MODEL,
-        max_tokens=max_tokens,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
-        output_config={"effort": effort, "format": {"type": "json_schema", "schema": schema}},
-    )
+    resp = None
+    for attempt in range(8):
+        try:
+            resp = client().messages.create(
+                model=MODEL,
+                max_tokens=max_tokens,
+                system=system,
+                messages=[{"role": "user", "content": prompt}],
+                output_config={"effort": effort, "format": {"type": "json_schema", "schema": schema}},
+            )
+            break
+        except anthropic.APIStatusError as e:
+            # The SDK already retries 408/409/429/5xx. Some gateways also return *intermittent* 401s
+            # under load (seen in practice), so retry those too, with backoff, before giving up.
+            if e.status_code in (400, 403, 404, 413, 422) or attempt == 7:
+                raise
+            time.sleep(min(30, 2 ** attempt))
+        except anthropic.APIConnectionError:
+            if attempt == 7:
+                raise
+            time.sleep(min(30, 2 ** attempt))
     if resp.stop_reason == "refusal":
         raise RuntimeError(f"refusal on {tag}: {resp.stop_details}")
     text = next((b.text for b in resp.content if b.type == "text"), "")

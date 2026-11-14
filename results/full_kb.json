@@ -1,0 +1,67 @@
+{
+ "variant": "full_kb",
+ "config": {
+  "heal": "none",
+  "plans": "static",
+  "planner": "llm",
+  "extractor": "llm",
+  "max_tries": 3,
+  "compress": true,
+  "resolve": true,
+  "feedback_noise": 0.0,
+  "random_docs_per_q": 2.0,
+  "seed": 0
+ },
+ "rounds": [
+  {
+   "round": 0,
+   "heldout": {
+    "n": 300,
+    "hits1": 0.9933333333333333,
+    "f1": 0.9933333333333333,
+    "ms_p50": 9.55189997330308,
+    "queries": 1.0,
+    "tokens": 1466.8833333333334,
+    "from_memory": 0.0,
+    "via_shortcut": 0.0,
+    "ms_mean": 18.17437466427994,
+    "hits1_seen-topic": 0.9933333333333333,
+    "hits1_unseen-topic": 0.9933333333333333,
+    "hits1_2hop": 1.0,
+    "hits1_3hop": 0.984251968503937,
+    "hits1_ci": [
+     0.9833333333333333,
+     1.0
+    ]
+   },
+   "eval_s": 5.6,
+   "graph": {
+    "text_edges": 0,
+    "docs_read": 0,
+    "templates": 0,
+    "plans": 0
+   },
+   "edits": {}
+  }
+ ],
+ "started": 1794641523.372909,
+ "finished": 1794641528.9637978,
+ "healer": {
+  "docs_read": 0,
+  "edges_added": 0,
+  "unlinked": 0,
+  "triples_found": 0
+ },
+ "resolver": {
+  "exact": 0,
+  "normalised": 0,
+  "alias_merge": 0,
+  "new_entity": 0,
+  "dropped": 0
+ },
+ "compressor": {
+  "compressed": 0,
+  "invalidated": 0,
+  "edges": 0
+ }
+}

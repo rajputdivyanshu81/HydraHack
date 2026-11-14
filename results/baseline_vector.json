@@ -1,0 +1,30 @@
+{
+ "variant": "vector",
+ "heldout": {
+  "n": 300,
+  "hits1": 0.15,
+  "f1": 0.11408360074882085,
+  "ms_p50": 66.51159992907196,
+  "queries": 0.0,
+  "tokens": 1866.93,
+  "from_memory": 0.0,
+  "via_shortcut": 0.0,
+  "ms_mean": 72.55450066295452,
+  "hits1_seen-topic": 0.15333333333333332,
+  "hits1_unseen-topic": 0.14666666666666667,
+  "hits1_2hop": 0.15028901734104047,
+  "hits1_3hop": 0.14960629921259844,
+  "hits1_ci": [
+   0.11,
+   0.19
+  ]
+ },
+ "k": 5,
+ "usage": {
+  "calls": 300,
+  "cached": 300,
+  "input_tokens": 517840,
+  "output_tokens": 42239,
+  "usd": 0.0729
+ }
+}

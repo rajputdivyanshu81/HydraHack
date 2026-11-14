@@ -135,11 +135,14 @@ class Healer:
             return []
         try:
             facts = self.extract(d["title"], d["text"])
-        except Exception as e:  # noqa: BLE001  (a failed extraction must not kill a run)
+        except Exception as e:  # noqa: BLE001
+            # Never skip a document silently: that would quietly weaken the run and make variants
+            # incomparable. llm.call_json already retried; abort loudly. Successful calls are cached,
+            # so re-running resumes almost for free.
             self._count("extract_errors")
             if self.log is not None:
                 self.log.write("extract_error", doc=d["title"], error=str(e)[:200])
-            return []
+            raise RuntimeError(f"extraction failed for {d['title']!r} after retries: {e}") from e
         triples = []
         for rel in TEXT_RELATIONS:
             for v in facts.get(rel, []) or []:
