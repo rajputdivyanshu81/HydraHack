@@ -1,0 +1,17 @@
+config/auth-token
+data/
+results/cache/
+.env
+__pycache__/
+*.pyc
+.venv/
+
+# dev/diagnostic artefacts (final results are committed explicitly)
+results/*smoke*
+results/*devtest*
+results/*fixcheck*
+results/*fix2*
+results/*diag*
+results/*_offline*
+results/*.log
+results/curve_offline_preview.png

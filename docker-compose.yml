@@ -1,0 +1,76 @@
+# Single-node HydraDB (open-source engine) for local development.
+# Env vars follow scripts/runtime_smoke.sh and the README quickstart in hydra-db/hydradb.
+services:
+  hydradb:
+    image: ghcr.io/hydra-db/hydradb:0.4.0
+    container_name: desirepath-hydradb
+    # The image runs as UID 10001; root avoids volume permission problems locally.
+    user: "0:0"
+    ports:
+      - "7687:7687"   # Bolt
+      - "8443:8443"   # HTTP query API
+      - "9090:9090"   # admin: /readyz, /metrics
+    volumes:
+      - hydra-data:/data
+      - ./config/auth-token:/run/secrets/auth-token:ro
+    environment:
+      RUST_MIN_STACK: "33554432"
+      GRAPH_USAGE_REPORT_ENABLED: "false"
+      CLOUD_PROVIDER: local
+      LOCAL_PATH: /data/store
+      GRAPH_NAMESPACE: default
+      GRAPH_ID: default
+      GRAPH_CELL_ID: cell-0
+      GRAPH_CELLS: cell-0
+      GRAPH_NODE_ID: node-0
+      GRAPH_DATA_PATH: data
+      GRAPH_ALLOW_PLAINTEXT: "true"
+      GRAPH_AUTH_TOKEN_FILE: /run/secrets/auth-token
+      GRAPH_DATA_CACHE_DIR: /data/cache
+      GRAPH_DATA_CACHE_BYTES: "1073741824"
+      GRAPH_BOLT_ADDR: 0.0.0.0:7687
+      GRAPH_HTTP_ADDR: 0.0.0.0:8443
+      GRAPH_ADMIN_ADDR: 0.0.0.0:9090
+      GRAPH_BOLT_NODE_ADDRESSES: node-0=127.0.0.1:7687
+      GRAPH_ADVERTISED_BOLT_ADDR: 127.0.0.1:7687
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /data/store /data/cache && exec /usr/local/bin/graph-node"]
+    restart: unless-stopped
+
+  # Second, independent instance for development/tests while experiments use the main one.
+  hydradb-dev:
+    image: ghcr.io/hydra-db/hydradb:0.4.0
+    container_name: desirepath-hydradb-dev
+    user: "0:0"
+    profiles: ["dev"]
+    ports:
+      - "17687:7687"
+      - "18443:8443"
+      - "19090:9090"
+    volumes:
+      - hydra-dev-data:/data
+      - ./config/auth-token:/run/secrets/auth-token:ro
+    environment:
+      RUST_MIN_STACK: "33554432"
+      GRAPH_USAGE_REPORT_ENABLED: "false"
+      CLOUD_PROVIDER: local
+      LOCAL_PATH: /data/store
+      GRAPH_NAMESPACE: default
+      GRAPH_ID: default
+      GRAPH_CELL_ID: cell-0
+      GRAPH_CELLS: cell-0
+      GRAPH_NODE_ID: node-0
+      GRAPH_DATA_PATH: data
+      GRAPH_ALLOW_PLAINTEXT: "true"
+      GRAPH_AUTH_TOKEN_FILE: /run/secrets/auth-token
+      GRAPH_DATA_CACHE_DIR: /data/cache
+      GRAPH_DATA_CACHE_BYTES: "1073741824"
+      GRAPH_BOLT_ADDR: 0.0.0.0:7687
+      GRAPH_HTTP_ADDR: 0.0.0.0:8443
+      GRAPH_ADMIN_ADDR: 0.0.0.0:9090
+      GRAPH_BOLT_NODE_ADDRESSES: node-0=127.0.0.1:7687
+      GRAPH_ADVERTISED_BOLT_ADDR: 127.0.0.1:7687
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /data/store /data/cache && exec /usr/local/bin/graph-node"]
+
+volumes:
+  hydra-data:
+  hydra-dev-data:
