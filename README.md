@@ -38,6 +38,15 @@ It answers questions by traversing a HydraDB graph. Each answer then teaches the
 
 Every edit goes to an append-only log with its cause (`results/*.edits.jsonl`): `ingest`, `reweight`, `merge`, `new_entity`, `compress`, `decompress`. The demo shows that log live.
 
+## What we found
+
+- **Healing drives accuracy; plan learning drives cost.** Healing only lifts held-out Hits@1 by about 22 points. Plan learning only adds about 3 points, but with both, DesirePath matches healing-only accuracy at roughly a quarter of the Claude tokens per query.
+- **Planning is solved; the graph's gaps are the problem.** On the complete graph, the same planner scores 99.3%. Every point between the damaged graph's 42.0% and that 99.3% is missing edges.
+- **The graph improves where people ask.** Seen topics gain the most. Never-seen topics move less, and query-time repair targets them.
+- **Entity merge links more names but doesn't change accuracy here.** Without it, held-out Hits@1 is 65.3%; with it, 65.0%, a difference well within noise. The questions' answers are almost always names already in the knowledge graph, so the extra links from merging rarely sit on an answer path. We report it as neutral.
+- **Path compression gives no measurable speedup here.** HydraDB already serves a 2–3 hop traversal in about 10 ms, so the HTTP round trip dominates. We keep compression because it's correct and exactly invalidated, but we don't claim a latency win.
+- **Silent failures were caught and fixed.** An early run silently skipped passages when an extraction call failed. Runs now retry and abort on failure, and every reported result has zero extraction errors (`healer.extract_errors` in each results file).
+
 ## Why it needs the graph
 
 - Answers are multi-hop sets. An example: "who directed the movies starring X". The answer needs X's movies first, then each of their directors, aggregated across many paths. Retrieving passages that resemble the question doesn't produce that.

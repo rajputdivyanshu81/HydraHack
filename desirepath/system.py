@@ -161,7 +161,8 @@ class System:
         if self.cfg.plans != "learn":
             return
         if self.cfg.feedback_noise and self.rng.random() < self.cfg.feedback_noise:
-            gold = {self.g.name[self.rng.randint(1, len(self.g.name))]}   # wrong feedback
+            # wrong feedback: a random entity (ids are not contiguous once text-created entities exist)
+            gold = {self.g.name[self.rng.choice(tuple(self.g.name))]}
         cands = list(out["_cands"])
         for p in self.path_plans(topic, gold, kind):
             if p not in cands:
