@@ -41,6 +41,7 @@ class Graph:
         self.next_text_edge = EDGE_ID_TEXT
         self.next_uses_edge = EDGE_ID_USES
         self.on_write = []   # callbacks(touched node ids) after edges are written
+        self.written = []    # (movie_id, relation, value_id) triples written since creation (for demos/exports)
 
     def mirror(self, triples):
         """Record already-loaded triples locally (dedupe only) without writing."""
@@ -76,6 +77,7 @@ class Graph:
         if first_edge_id is None:
             self.next_text_edge = eid
         self.triples.update(new)
+        self.written.extend(new)
         touched = {m for m, _, _ in new} | {v for _, _, v in new}
         for hook in self.on_write:
             hook(touched)

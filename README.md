@@ -3,6 +3,8 @@
 **A knowledge graph on HydraDB that repairs itself where users ask.**
 HydraDB Hackathon, Track 1: the self-improving graph.
 
+**Live replay (interactive, free-hosted):** https://rajputdivyanshu81.github.io/HydraHack/ . It replays real recorded runs against HydraDB; run the full system live with `docker compose up` (see below).
+
 ![held-out accuracy by learning round](results/curve.png)
 
 <!-- RESULTS:START -->

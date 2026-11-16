@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DesirePath: a graph that repairs itself</title>
+<meta name="description" content="A knowledge graph on HydraDB that repairs itself where users ask. Interactive replay of real runs.">
+<style>
+:root{
+  --bg:#fbfaf8; --card:#ffffff; --ink:#1f2328; --muted:#656d76; --line:#e4e1db; --accent:#cf4a1b; --accent-soft:#fbe9e1;
+  --ok:#1a7f37; --ok-soft:#dcf5e3; --bad:#b42318; --bad-soft:#fde5e3; --chip:#f1eee9;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14110f; --card:#1d1916; --ink:#ece8e3; --muted:#9a948c; --line:#332d28; --accent:#ee7a4a; --accent-soft:#3a2118;
+    --ok:#56d17a; --ok-soft:#14301d; --bad:#ff8a80; --bad-soft:#3a1a18; --chip:#2a2420;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 16px 64px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0 0 8px;letter-spacing:-.02em}
+h2{font-size:20px;margin:36px 0 12px}
+.lead{font-size:18px;color:var(--muted);margin:0 0 18px;max-width:46em}
+.banner{background:var(--accent-soft);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:14px;margin:0 0 22px}
+.banner a{color:var(--accent);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 8px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font-size:30px;line-height:1.1;letter-spacing:-.02em}
+.kpi span{color:var(--muted);font-size:13px}
+.kpi.hot b{color:var(--accent)}
+img.chart{width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+select{flex:1 1 320px;min-width:0;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+button{padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.45;cursor:default}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:2px 10px;font-size:13px;margin:2px 4px 2px 0;font-family:ui-monospace,Consolas,monospace}
+.verdict{font-weight:700;padding:3px 10px;border-radius:6px;display:inline-block}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600}
+td.ok{color:var(--ok);font-weight:700}
+.meta{color:var(--muted);font-size:13px}
+.step{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 6px}
+.edge{font-family:ui-monospace,Consolas,monospace;font-size:13px;margin:2px 0}
+.edge em{color:var(--accent);font-style:normal}
+ul.found{padding-left:20px} ul.found li{margin:6px 0}
+footer{margin-top:40px;color:var(--muted);font-size:14px}
+a{color:var(--accent)}
+@media (max-width:520px){th:nth-child(3),td:nth-child(3){display:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>DesirePath</h1>
+  <p class="lead">A knowledge graph on HydraDB that repairs itself where users ask. Held-out multi-hop accuracy
+    <b>42% → 80%</b>, Claude cost per query down <b>77%</b>. Vector-store RAG on the same questions: <b>15%</b>.</p>
+
+  <div class="banner"><b>This is an interactive replay of real runs, not a live server.</b> Each question below was run against
+    HydraDB 0.4.0 on a graph with half its edges deleted, and the plan, answers, detected gaps and healed edges were recorded.
+    The graph was reset to the damaged state before every question. Run it live yourself with
+    <code>docker compose up</code> from the <a href="https://github.com/rajputdivyanshu81/HydraHack">source repo</a>.</div>
+
+  <div class="kpis" id="kpis"></div>
+  <img class="chart" src="curve.png" alt="Held-out accuracy by learning round: DesirePath rises from 42% to 65%, 80% with query-time repair; vector RAG stays at 15%">
+
+  <h2>Try it</h2>
+  <div class="card">
+    <div class="row">
+      <select id="pick" aria-label="Question"></select>
+      <button class="primary" id="ask">Ask the graph</button>
+    </div>
+    <p class="meta" id="hint">Pick a question and ask it. Every question here is a held-out question the system never learned from.</p>
+  </div>
+  <div id="out1"></div>
+  <div id="out2"></div>
+
+  <h2>Results</h2>
+  <div class="card"><table id="table"></table>
+    <p class="meta">Hits@1 on 300 held-out MetaQA 2- and 3-hop questions. 50% of the knowledge-graph edges were deleted (seed 0).
+    Half the held-out questions are about topics the learning stream never mentions.</p></div>
+
+  <h2>What we found</h2>
+  <ul class="found">
+    <li><b>Healing drives accuracy; plan learning drives cost.</b> Healing alone reaches 64.3%; learned plans add 0.7 points but cut Claude tokens per query by 77%.</li>
+    <li><b>Targeting matters.</b> Random ingestion with the same reading budget reaches only 52.7%, against 65.0% for gap-driven healing.</li>
+    <li><b>Query-time repair</b> (heal from text when traversal hits a gap, then answer) reaches 80.0% overall and lifts never-seen topics from 52.7% to 81.3%.</li>
+    <li><b>Honest about what didn't help:</b> entity merge was neutral (65.3% without it), and path compression gave no measurable speedup because HydraDB already serves a 2–3 hop traversal in about 10 ms.</li>
+    <li><b>Under load:</b> 32 concurrent readers plus a live writer, zero errors.</li>
+  </ul>
+
+  <footer>Built for the HydraDB Hackathon, Track 1: the self-improving graph. Code, results and the full write-up:
+    <a href="https://github.com/rajputdivyanshu81/HydraHack">github.com/rajputdivyanshu81/HydraHack</a>.</footer>
+</main>
+
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = x => x == null ? '—' : (100 * x).toFixed(1) + '%';
+
+function chips(plan){ return plan ? plan.split('>').map(p => `<span class="chip">${esc(p)}</span>`).join('→') : '<span class="meta">no plan</span>'; }
+
+function answerTable(top){
+  if(!top.length) return '<p class="meta">The traversal returned nothing.</p>';
+  return `<table><tr><th>Answer</th><th>Paths</th><th></th></tr>` +
+    top.map(t => `<tr><td>${esc(t.name)}</td><td>${t.paths}</td><td class="${t.ok?'ok':''}">${t.ok?'✓ correct':''}</td></tr>`).join('') + '</table>';
+}
+
+function renderPlain(q){
+  const r = q.plain;
+  const verdict = r.pred ? `<span class="verdict ${r.hit?'ok':'bad'}">${r.hit?'✅ correct':'❌ wrong'}: ${esc(r.pred)}</span>`
+                         : '<span class="verdict bad">❌ no answer found</span>';
+  const gaps = r.gaps.length ? `<p><b>Gaps detected</b> (nodes with no edge for the next hop): ${r.gaps.map(g=>`<span class="chip">${esc(g)}</span>`).join('')}</p>` : '';
+  return `<div class="card"><p class="step">Step 1 · traverse HydraDB</p>
+    <p>${esc(q.question)} <span class="meta">(${q.hop}-hop)</span></p>
+    <p>Plan: ${chips(r.plan)} <span class="meta">from ${esc(r.source)}</span></p>
+    <p>${verdict} ${r.hit && q.n_gold>1 ? `<span class="meta">(${q.n_gold} correct answers exist)</span>`:''}</p>
+    ${answerTable(r.top)}${gaps}
+    <p class="meta">${r.queries} HydraDB queries · ${r.ms} ms · ${r.n_answers} candidate answers</p></div>`;
+}
+
+function renderRepair(q){
+  const p = q.plain, r = q.repair;
+  const edges = r.sample_edges.map(e => `<div class="edge">${esc(e.movie)} —<em>${esc(e.rel)}</em>→ ${esc(e.value)}</div>`).join('');
+  const verdict = r.pred ? `<span class="verdict ${r.hit?'ok':'bad'}">${r.hit?'✅ correct':'❌ still wrong'}: ${esc(r.pred)}</span>`
+                         : '<span class="verdict bad">❌ still no answer</span>';
+  const delta = (!p.hit && r.hit) ? 'The graph was missing edges; reading the text about the stuck entities fixed the answer.'
+              : (!r.hit ? 'Healing wrote edges, but the text did not contain the missing fact, so this question stays unanswered. Not every gap is recoverable from text.' : '');
+  return `<div class="card"><p class="step">Step 2 · heal from text, then ask again</p>
+    <p>Read <b>${r.docs_read}</b> passages and wrote <b>${r.healed_edges}</b> new edges into HydraDB
+      ${r.merges||r.new_entities ? `(${r.merges} name merges, ${r.new_entities} new entities)`:''}
+      <span class="meta">· ${r.heal_ms} ms with Claude replayed from cache</span></p>
+    <details><summary class="meta">Sample of the edges written</summary>${edges}</details>
+    <p>Plan: ${chips(r.plan)}</p><p>${verdict}</p>${answerTable(r.top)}
+    <p class="meta">${r.queries} HydraDB queries · ${r.ms} ms</p><p>${delta}</p></div>`;
+}
+
+let DATA, current;
+function fillPicker(){
+  const groups = [['Fixed by healing from text', q=>q.repair && !q.plain.hit && q.repair.hit],
+                  ['Healing can\'t fix these (the fact isn\'t in the text)', q=>q.repair && !q.plain.hit && !q.repair.hit],
+                  ['Already answered correctly', q=>!q.repair]];
+  const sel = document.getElementById('pick'); sel.innerHTML = '';
+  groups.forEach(([label, f]) => {
+    const qs = DATA.questions.filter(f); if(!qs.length) return;
+    const og = document.createElement('optgroup'); og.label = label;
+    qs.forEach(q => { const o = document.createElement('option'); o.value = q.qid; o.textContent = q.question; og.appendChild(o); });
+    sel.appendChild(og);
+  });
+}
+function pick(){ return DATA.questions.find(q => q.qid === document.getElementById('pick').value); }
+
+function ask(){
+  current = pick();
+  const out2 = document.getElementById('out2'); out2.innerHTML = '';
+  document.getElementById('out1').innerHTML = renderPlain(current);
+  if(current.repair){
+    out2.innerHTML = '<div class="card"><button class="primary" id="heal">Heal from text and ask again</button></div>';
+    document.getElementById('heal').onclick = () => { out2.innerHTML = renderRepair(current); };
+  }
+}
+
+function boot(d){
+  DATA = d; const s = d.summary, last = s.rounds[s.rounds.length-1], first = s.rounds[0];
+  document.getElementById('kpis').innerHTML = [
+    ['hot', pct(s.serve_repair), 'with query-time repair'],
+    ['', pct(last.hits), `after ${last.round} learning rounds (from ${pct(first.hits)})`],
+    ['', pct(s.vector), 'vector-store RAG, same questions'],
+    ['', Math.round(100*(1-last.tokens/first.tokens))+'% fewer', `Claude tokens per query (${Math.round(first.tokens)} → ${Math.round(last.tokens)})`],
+  ].map(k => `<div class="kpi ${k[0]}"><b>${k[1]}</b><span>${k[2]}</span></div>`).join('');
+  const t = s.table, rows = [
+    ['Vector-store RAG (all 18k passages, top-5)', s.vector], ['Claude alone, no retrieval', s.llm],
+    ['Damaged graph, no learning', t.static], ['Random ingestion, same reading budget', t.random_heal],
+    ['Plan learning only', t.plans_only], ['Healing only', t.heal_only], ['No entity merge', t.no_merge],
+    ['20% wrong feedback', t.noisy_fb], ['<b>DesirePath (6 rounds)</b>', t.desirepath],
+    ['<b>DesirePath + query-time repair</b>', s.serve_repair], ['Complete graph (upper bound)', t.full_kb]];
+  document.getElementById('table').innerHTML = '<tr><th>System</th><th>Held-out Hits@1</th></tr>' +
+    rows.map(r => `<tr><td>${r[0]}</td><td>${pct(r[1])}</td></tr>`).join('');
+  fillPicker();
+  document.getElementById('ask').onclick = ask;
+  ask();
+}
+if (typeof window !== 'undefined' && typeof fetch === 'function' && typeof document !== 'undefined')
+  fetch('data.json').then(r => r.json()).then(boot).catch(e => {
+    document.getElementById('hint').textContent = 'Could not load data.json: ' + e;
+  });
+if (typeof module !== 'undefined') module.exports = { renderPlain, renderRepair, pct, answerTable };
+</script>
+</body>
+</html>
