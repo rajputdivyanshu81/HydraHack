@@ -22,6 +22,10 @@ CACHE_PATH = os.path.join(ROOT, "results", "cache", "llm.sqlite")
 PRICE_IN, PRICE_OUT = 0.10, 0.50
 
 
+class CacheMiss(RuntimeError):
+    """Raised when there is no API key and the request is not in the recorded cache."""
+
+
 class Usage:
     def __init__(self):
         self.lock = threading.Lock()
@@ -88,6 +92,9 @@ def call_json(system: str, prompt: str, schema: dict, *, max_tokens: int = 2000,
         USAGE.add(row[1], row[2], cached=True)
         return json.loads(row[0])
 
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        # Hosted demo: no key, only the recorded cache. A miss means this exact request was never recorded.
+        raise CacheMiss(f"not in the recorded cache ({tag or 'call'}); this demo has no API key")
     resp = None
     for attempt in range(8):
         try:

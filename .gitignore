@@ -15,3 +15,5 @@ results/*diag*
 results/*_offline*
 results/*.log
 results/curve_offline_preview.png
+
+dist/

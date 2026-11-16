@@ -17,45 +17,42 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
 
 from desirepath import llm  # noqa: E402
-from desirepath.data import OUT  # noqa: E402
-from desirepath.db import Hydra  # noqa: E402
-from desirepath.graph import Graph, load_prepared  # noqa: E402
-from desirepath.heal import Corpus  # noqa: E402
-from desirepath.system import Config, System  # noqa: E402
+from desirepath.boot import boot as _boot  # noqa: E402
 
 st.set_page_config(page_title="DesirePath", layout="wide")
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner="Starting HydraDB and loading the damaged graph (about a minute on first visit) ...")
 def boot():
-    db = Hydra()
-    ents, kb = load_prepared()
-    g = Graph(db, ents)
-    g.mirror(kb["kept"])
-    offline = not os.getenv("ANTHROPIC_API_KEY")
-    cfg = Config(heal="demand", plans="learn", planner="rules" if offline else "llm",
-                 extractor="rules" if offline else "llm")
-    sysm = System(db, g, Corpus(), cfg, os.path.join(ROOT, "results", "demo.edits.jsonl"))
-    wl = json.load(open(os.path.join(OUT, "workload.json")))
-    return db, g, sysm, wl, offline
+    return _boot(os.path.join(ROOT, "results", "demo.edits.jsonl"))
 
 
-db, g, sysm, wl, offline = boot()
+db, g, sysm, wl, mode = boot()
 
 st.title("DesirePath")
 st.caption("A self-healing knowledge graph on HydraDB: it repairs itself where users ask. "
-           + ("Offline mode (rule planner, regex extractor)." if offline else "Claude Haiku 5.5 planner and extractor."))
+           f"Running {mode}. The graph starts with half its edges deleted (MetaQA movie graph).")
 
 left, right = st.columns([1.3, 1])
 with left:
-    pool = wl["heldout"][:150]
-    labels = [f"{q['question']}  ({q['hop']}-hop)" for q in pool]
+    # questions the fresh graph gets wrong but query-time repair fixes come first (starred)
+    star_path = os.path.join(ROOT, "results", "demo_questions.json")
+    stars = set(json.load(open(star_path))) if os.path.exists(star_path) else set()
+    byid = {x["qid"]: x for x in wl["heldout"]}
+    pool = [byid[k] for k in json.load(open(star_path)) if k in byid][:40] if stars else []
+    pool += [x for x in wl["heldout"] if x["qid"] not in {y["qid"] for y in pool}][:110]
+    labels = [("⭐ " if x["qid"] in stars else "") + f"{x['question']}  ({x['hop']}-hop)" for x in pool]
+    st.caption("⭐ = the graph starts out wrong, and healing from text fixes it. Try one with repair on, or ask it plain, "
+               "then give feedback and ask again.")
     i = st.selectbox("Question", range(len(pool)), format_func=lambda k: labels[k])
     q = pool[i]
     repair = st.toggle("Query-time repair (heal from text on a gap, then answer)", value=False)
     if st.button("Ask", type="primary"):
-        st.session_state["out"] = sysm.answer_with_repair(q) if repair else sysm.answer(q, probe=True)
-        st.session_state["q"] = q
+        try:
+            st.session_state["out"] = sysm.answer_with_repair(q) if repair else sysm.answer(q, probe=True)
+            st.session_state["q"] = q
+        except llm.CacheMiss as e:
+            st.error(f"This demo replays recorded Claude responses: {e}. Pick one of the listed questions.")
     out = st.session_state.get("out")
     if out and st.session_state.get("q", {}).get("qid") == q["qid"]:
         gold = set(q["answers"])
@@ -73,7 +70,11 @@ with left:
         st.caption("Correct answers: " + ", ".join(sorted(gold)[:10]))
         if st.button("Give feedback and learn"):
             before = sysm.healer.stats["edges_added"]
-            sysm.learn(q, out)
+            try:
+                sysm.learn(q, out)
+            except (llm.CacheMiss, RuntimeError) as e:
+                st.error(f"Could not learn from this one in replay mode: {e}")
+                st.stop()
             st.success(f"Healed: +{sysm.healer.stats['edges_added'] - before} edges written to HydraDB. "
                        "Plan memory reweighted. Ask again.")
             st.session_state.pop("out")
